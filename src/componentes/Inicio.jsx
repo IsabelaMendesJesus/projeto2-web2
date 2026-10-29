@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
@@ -6,6 +5,7 @@ import api from '../api';
 function Inicio() {
   const [filmes, setFilmes] = useState([]);
   const [erro, setErro] = useState('');
+  const [busca, setBusca] = useState('');
 
   useEffect(() => {
     api.get('/filmes')
@@ -15,6 +15,10 @@ function Inicio() {
         setErro('Não foi possível carregar os filmes.');
       });
   }, []);
+
+  const filmesFiltrados = filmes.filter(f =>
+    (f.nome || '').toLowerCase().includes(busca.toLowerCase())
+  );
 
   return (
     <div className="container mt-4 pagina-filmes">
@@ -29,8 +33,16 @@ function Inicio() {
         </div>
       )}
 
+      <input
+        type="text"
+        className="campo-alterar mb-4"
+        placeholder="Buscar filme pelo nome..."
+        value={busca}
+        onChange={e => setBusca(e.target.value)}
+      />
+
       <div className="lista-filmes">
-        {filmes.map(f => (
+        {filmesFiltrados.map(f => (
           <Link
             key={f.id}
             to={`/ler/${f.id}`}
@@ -47,7 +59,13 @@ function Inicio() {
 
         {filmes.length === 0 && !erro && (
           <p className="mensagem-vazia">
-            Nenhum filme encontrado.
+            Nenhum filme cadastrado.
+          </p>
+        )}
+
+        {filmes.length > 0 && filmesFiltrados.length === 0 && (
+          <p className="mensagem-vazia">
+            Nenhum filme encontrado para "{busca}".
           </p>
         )}
       </div>
